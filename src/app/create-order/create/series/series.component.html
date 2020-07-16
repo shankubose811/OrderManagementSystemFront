@@ -1,0 +1,52 @@
+<br>
+<label name="Series">Series</label>
+<br>
+<select class="form-control"  (change)="onSeriesSelected($event)" 
+ formControlName="series">
+ 
+ <option value="">select</option>
+ <option [(ngModel)] = "fetchSeries" *ngFor="let series of fetchSeries">{{series.sName}}</option>
+</select>
+
+<br>
+<label name="Model">Model</label>
+<br>
+<select class="form-control"  (change)="onModelSelected($event)" (change) ="onModelSelectedColor($event)" 
+formControlName="model">
+    <option value="">select</option>
+    <option [value]="model.modelId" *ngFor="let model of fetchModel">{{model.modelName}}</option>
+</select>
+
+
+<br>
+<label name="Accessory">Accessory</label>
+<br>
+<div class="allign">
+<ng-multiselect-dropdown
+  [placeholder]="'select accessory'"
+  [data]="fetchAccessory"
+  
+  [settings]="dropdownSettings"
+  (onSelect)="onItemSelect($event)"
+  (onSelectAll)="onSelectAll($event)"
+>
+</ng-multiselect-dropdown>
+</div>
+
+<br>
+<label name="Color">Color</label>
+<br>
+<div class="allign">
+<ng-multiselect-dropdown
+  [placeholder]="'select color'"
+  [data]="fetchColor"
+  
+  [settings]="dropdownSettingsColor"
+  (onSelect)="onItemSelect($event)"
+  (onSelectAll)="onSelectAll($event)"
+>
+</ng-multiselect-dropdown>
+</div>
+
+
+
