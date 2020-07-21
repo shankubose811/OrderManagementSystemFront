@@ -1,4 +1,7 @@
 <br>
+<label >The Total Price is = {{totalSumOfOrder()}}</label>
+<br>
+<br>
 <label name="Series">Series</label>
 <br>
 <select class="form-control"  (change)="onSeriesSelected($event)" 
@@ -11,7 +14,7 @@
 <br>
 <label name="Model">Model</label>
 <br>
-<select class="form-control"  (change)="onModelSelected($event)" (change) ="onModelSelectedColor($event)" 
+<select class="form-control"  (change)="onModelSelected($event)" 
 formControlName="model">
     <option value="">select</option>
     <option [value]="model.modelId" *ngFor="let model of fetchModel">{{model.modelName}}</option>
@@ -27,7 +30,8 @@ formControlName="model">
   [data]="fetchAccessory"
   
   [settings]="dropdownSettings"
-  (onSelect)="onItemSelect($event)"
+  (onSelect)="onItemSelectAccy($event)"
+  (onDeSelect)="onItemDeSelectAccy($event)"
   (onSelectAll)="onSelectAll($event)"
 >
 </ng-multiselect-dropdown>
@@ -42,11 +46,12 @@ formControlName="model">
   [data]="fetchColor"
   
   [settings]="dropdownSettingsColor"
-  (onSelect)="onItemSelect($event)"
+  (onSelect)="onItemSelectColor($event)"
+  (onDeSelect)="onItemDeSelectColor($event)"
   (onSelectAll)="onSelectAll($event)"
 >
 </ng-multiselect-dropdown>
 </div>
-
+<br>
 
 

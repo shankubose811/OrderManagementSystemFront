@@ -1,3 +1,5 @@
+import { CreateComponent } from './../create.component';
+import { OrderBean } from './order-bean.component';
 import { ColorBean } from './color-bean.component';
 import { AccessoryBean } from '../accessory/accessory-bean.component';
 import { ModelBean } from './model-bean.component';
@@ -6,7 +8,7 @@ import { SeriesBean } from './series-bean.component';
 import { Component, OnInit, Output } from '@angular/core';
 import { Observable } from 'rxjs';
 import {map} from 'rxjs/operators'
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpClientJsonpModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-series',
@@ -16,14 +18,26 @@ import { HttpClient } from '@angular/common/http';
 export class SeriesComponent implements OnInit {
 
 
+  public totalSeriesPrice : number = 0;
+  public totalModelPrice : number = 0;
+  public totalColorPrice : number = 0;
+  public totalAccyPrice : number = 0;
   public totalPrice : number = 0;
   public fetchColor:ColorBean[] = [];
   public fetchAccessory:AccessoryBean[] = [];
   isFetching : boolean = true;
   public fetchSeries : SeriesBean[]  = [];
   public fetchModel : ModelBean[]=[];
-  constructor(private http : HttpClient , private fetchUrl : UrlService) { }
+  public accyArray = [];
+  public colorArray = [];
+  public accessoryFinalArray : number[] = [];
+  public colorFinalArray : number[] = [];
+  public series : string = "";
+  public model : string = "";
+  public order : OrderBean = null;
+  constructor( private fetchUrl : UrlService ,private create : CreateComponent) { }
 
+  
 
   dropdownSettings:{};
   dropdownSettingsColor:{};
@@ -47,6 +61,14 @@ export class SeriesComponent implements OnInit {
   onSeriesSelected(event:any)
   {
     var value = event.target.value;
+    this.series = value;
+    for(let ser of this.fetchSeries)
+    {
+      if(value === ser.sName)
+      {
+      this.totalSeriesPrice = ser.seriesPrice;
+      }
+    }
     console.log("The selected value is"+value);
     this.fetchUrl.modelService(value).subscribe((model: ModelBean[])=>{
       this.fetchModel=model;
@@ -55,6 +77,7 @@ export class SeriesComponent implements OnInit {
     })
 
   }
+    
 
   public fetchSeriesDetails(){
     this.fetchUrl.seriesService().subscribe((series:SeriesBean[])=>{
@@ -64,37 +87,122 @@ export class SeriesComponent implements OnInit {
   }
 
    public onModelSelected(event:any) {
-    var modelId=event.target.value;
-     this.fetchUrl.accessoryService(modelId).subscribe((accessory:AccessoryBean[])=>{
+    var colorModel=event.target.value;
+    
+    console.log(colorModel);
+    for(let mod of this.fetchModel)
+    {
+      if(mod.modelId == colorModel)
+      {
+        this.model = mod.modelName;
+      this.totalModelPrice = mod.modelPrice;
+      }
+    }
+     this.fetchUrl.accessoryService(colorModel).subscribe((accessory:AccessoryBean[])=>{
      this.fetchAccessory=accessory;
      console.log(this.fetchAccessory);
      })
-   }
-   public onModelSelectedColor(event:any) {
-    var colorId=event.target.value;
-     this.fetchUrl.colorService(colorId).subscribe((color:ColorBean[])=>{
-     this.fetchColor=color;
-     console.log(this.fetchColor);
-     })
+     this.fetchUrl.colorService(colorModel).subscribe((color:ColorBean[])=>{
+      this.fetchColor=color;
+      console.log(this.fetchColor);
+      })
+
    }
 
-  //  public onAccessorySelect(event : any)
-  //  {
-  //   var accessoryId = event.target.value;
-
-
-  //  }
-
-
-   onItemSelect(item: any) {
-    console.log(item);
+   saveData(){
+    //  this.order.mName = this.model;
+    //  console.log(this.model);
+    //  this.order.sName = this.series;
+    //  this.order.oId = "";
+    //  this.order.totalPrice = this.totalPrice; 
+     this.create.saveOrderData(this.series,this.model , this.totalPrice ); 
+   }
+ 
+  passObjGetArray(item :any)
+  {
+    let arr = [];
+    Object.keys(item).map(function(key){  
+      arr.push({[key]:item[key]}) 
+      }); 
+      return arr;
   }
+
+   
+   onItemSelectAccy(item: any) {
+   this.accyArray =  this.passObjGetArray(item);
+   this.accessoryFinalArray.push(this.accyArray[0].accyId);
+   
+   for(let id of this.fetchAccessory)
+    {
+      if(id.accyId === this.accyArray[0].accyId)
+      {
+        this.totalAccyPrice = this.totalAccyPrice + id.accyPrice;
+      }
+    }
+   console.log(this.totalAccyPrice);
+
+  }
+  onItemDeSelectAccy(item : any)
+  {
+    this.accyArray =  this.passObjGetArray(item);
+    this.accessoryFinalArray.pop();
+    console.log(this.accessoryFinalArray);
+    for(let id of this.fetchAccessory)
+    {
+      if(id.accyId === this.accyArray[0].accyId)
+      {
+        this.totalAccyPrice = this.totalAccyPrice - id.accyPrice;
+      }
+    }
+    console.log(this.totalAccyPrice);
+
+
+  }
+
+  onItemSelectColor(item: any) {
+    this.colorArray =  this.passObjGetArray(item);
+    this.colorFinalArray.push(this.accyArray[0].accyId);
+    for(let id of this.fetchColor)
+     {
+       if(id.colorId === this.colorArray[0].colorId)
+       {
+         this.totalColorPrice = this.totalColorPrice + id.colorPrice;
+       }
+     }
+    console.log(this.totalColorPrice);
+ 
+   }
+   onItemDeSelectColor(item : any)
+   {
+
+    this.colorArray =  this.passObjGetArray(item);
+    this.colorFinalArray.pop();
+    console.log(this.colorFinalArray);
+    for(let id of this.fetchColor)
+     {
+       if(id.colorId === this.colorArray[0].colorId)
+       {
+         this.totalColorPrice = this.totalColorPrice - id.colorPrice;
+       }
+     }
+    console.log(this.totalColorPrice);
+   }
+
+
   onSelectAll(items: any) {
     console.log(items);
   }
+ 
+ 
+  totalSumOfOrder()
+  {
+    this.totalPrice = this.totalAccyPrice + this.totalModelPrice +this.totalSeriesPrice + this.totalColorPrice;
+     
+    console.log(this.totalPrice);
+    return this.totalPrice;
+  }
 
-
+ 
   
-
 
 }
