@@ -1,11 +1,26 @@
+
+export class Color{
+
+    colorId : number;
+    colorName : string;
+
+}
+
+export class Accessory{
+
+    accessoryId : number;
+    accessoryName : string;
+
+}
+
 export class OrderBean{
 
-    oId : string ;
-    sName : string;
-    mName : string;
+    orderId : string;
+    series : string ;
+    model : string ;
+    accessory : Accessory[] ;
+    color : Color[] ;
     totalPrice : number;
-   
-
 
 
 }

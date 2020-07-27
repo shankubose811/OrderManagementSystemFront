@@ -24,10 +24,13 @@ public seriesService()
     return this.http.get('http://localhost:8101/series');
 }
 
-// public orderServiceOne(order)
-// {
-//     return this.http.post('http://localhost:8200/order/',order);
-// }
+public orderService(orderStore)
+{
+    console.log(orderStore);
+    
+    return this.http.post('http://localhost:8200/order',orderStore);
+    
+}
 
 
 }

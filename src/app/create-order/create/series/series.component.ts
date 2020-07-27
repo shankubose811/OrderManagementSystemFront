@@ -1,11 +1,11 @@
 import { CreateComponent } from './../create.component';
-import { OrderBean } from './order-bean.component';
+import { OrderBean, Accessory, Color } from './order-bean.component';
 import { ColorBean } from './color-bean.component';
 import { AccessoryBean } from '../accessory/accessory-bean.component';
 import { ModelBean } from './model-bean.component';
 import { UrlService } from '../../../Url.service';
 import { SeriesBean } from './series-bean.component';
-import { Component, OnInit, Output } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { Observable } from 'rxjs';
 import {map} from 'rxjs/operators'
 import { HttpClient, HttpClientJsonpModule } from '@angular/common/http';
@@ -17,7 +17,7 @@ import { HttpClient, HttpClientJsonpModule } from '@angular/common/http';
 })
 export class SeriesComponent implements OnInit {
 
-
+  public returnMessage : string;
   public totalSeriesPrice : number = 0;
   public totalModelPrice : number = 0;
   public totalColorPrice : number = 0;
@@ -30,11 +30,11 @@ export class SeriesComponent implements OnInit {
   public fetchModel : ModelBean[]=[];
   public accyArray = [];
   public colorArray = [];
-  public accessoryFinalArray : number[] = [];
-  public colorFinalArray : number[] = [];
-  public series : string = "";
-  public model : string = "";
-  public order : OrderBean = null;
+  public accessoryFinalArray : Accessory[] = [];
+  public colorFinalArray : Color[] = [];
+  public series : string ;
+  public model : string ;
+  
   constructor( private fetchUrl : UrlService ,private create : CreateComponent) { }
 
   
@@ -61,7 +61,7 @@ export class SeriesComponent implements OnInit {
   onSeriesSelected(event:any)
   {
     var value = event.target.value;
-    this.series = value;
+    
     for(let ser of this.fetchSeries)
     {
       if(value === ser.sName)
@@ -70,6 +70,7 @@ export class SeriesComponent implements OnInit {
       }
     }
     console.log("The selected value is"+value);
+    this.series = value;
     this.fetchUrl.modelService(value).subscribe((model: ModelBean[])=>{
       this.fetchModel=model;
 
@@ -98,6 +99,7 @@ export class SeriesComponent implements OnInit {
       this.totalModelPrice = mod.modelPrice;
       }
     }
+  
      this.fetchUrl.accessoryService(colorModel).subscribe((accessory:AccessoryBean[])=>{
      this.fetchAccessory=accessory;
      console.log(this.fetchAccessory);
@@ -109,14 +111,14 @@ export class SeriesComponent implements OnInit {
 
    }
 
-   saveData(){
-    //  this.order.mName = this.model;
-    //  console.log(this.model);
-    //  this.order.sName = this.series;
-    //  this.order.oId = "";
-    //  this.order.totalPrice = this.totalPrice; 
-     this.create.saveOrderData(this.series,this.model , this.totalPrice ); 
-   }
+  //  saveData(){
+  //   //  this.order.mName = this.model;
+  //   //  console.log(this.model);
+  //   //  this.order.sName = this.series;
+  //   //  this.order.oId = "";
+  //   //  this.order.totalPrice = this.totalPrice; 
+  //    this.create.saveOrderData(this.series,this.model , this.totalPrice ); 
+  //  }
  
   passObjGetArray(item :any)
   {
@@ -130,7 +132,7 @@ export class SeriesComponent implements OnInit {
    
    onItemSelectAccy(item: any) {
    this.accyArray =  this.passObjGetArray(item);
-   this.accessoryFinalArray.push(this.accyArray[0].accyId);
+   this.accessoryFinalArray.push(this.accyArray[0]);
    
    for(let id of this.fetchAccessory)
     {
@@ -161,7 +163,7 @@ export class SeriesComponent implements OnInit {
 
   onItemSelectColor(item: any) {
     this.colorArray =  this.passObjGetArray(item);
-    this.colorFinalArray.push(this.accyArray[0].accyId);
+    this.colorFinalArray.push(this.colorArray[0]);
     for(let id of this.fetchColor)
      {
        if(id.colorId === this.colorArray[0].colorId)
@@ -202,7 +204,27 @@ export class SeriesComponent implements OnInit {
     return this.totalPrice;
   }
 
- 
   
+  
+  saveOrderData(){
+    
+    let requestParameter = new  OrderBean();
+    requestParameter.orderId = this.series.substring(5,(this.series.length)) + this.model.substring(4,(this.model.length))
+                                + Math.floor(Math.random()*100) ;
+    requestParameter.series = this.series;
+    console.log(this.series);
+    requestParameter.model = this.model;
+    console.log(this.model);
+    requestParameter.accessory = this.accessoryFinalArray;
+    requestParameter.color = this.colorFinalArray;
+    requestParameter.totalPrice = this.totalPrice;
+    
+    this.fetchUrl.orderService(requestParameter).subscribe(data =>{
+      console.log(data);
+    })
+
+  }
+  
+  resetMethod(){}
 
 }
